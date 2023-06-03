@@ -1,5 +1,5 @@
 {
-  "name": "TestSuitApprover",
+  "name": "payment-provider-hackathon",
   "paymentMethods": [
     {
       "name": "Visa",
