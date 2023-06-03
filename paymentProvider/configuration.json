@@ -7,23 +7,23 @@
     },
     {
       "name": "American Express",
-      "allowsSplit": "onCapture"
+      "allowsSplit": "onAuthorize"
     },
     {
       "name": "Diners",
-      "allowsSplit": "onCapture"
+      "allowsSplit": "onAuthorize"
     },
     {
       "name": "Elo",
-      "allowsSplit": "onCapture"
+      "allowsSplit": "onAuthorize"
     },
     {
       "name": "Hipercard",
-      "allowsSplit": "onCapture"
+      "allowsSplit": "onAuthorize"
     },
     {
       "name": "Mastercard",
-      "allowsSplit": "onCapture"
+      "allowsSplit": "onAuthorize"
     },
     {
       "name": "BankInvoice",
