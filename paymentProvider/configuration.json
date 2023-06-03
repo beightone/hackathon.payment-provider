@@ -3,27 +3,27 @@
   "paymentMethods": [
     {
       "name": "Visa",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "American Express",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "Diners",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "Elo",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "Hipercard",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "Mastercard",
-      "allowsSplit": "onAuthorize"
+      "allowsSplit": "onCapture"
     },
     {
       "name": "BankInvoice",
