@@ -15,5 +15,7 @@ export class Refund<
   ) {
     this.ctx = ctx
     this.refund = refund
+
+    console.info(this.ctx, this.refund)
   }
 }

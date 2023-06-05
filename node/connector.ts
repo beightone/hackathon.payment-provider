@@ -16,6 +16,7 @@ import { VBase } from '@vtex/api'
 
 import { randomString } from './utils'
 import { executeAuthorization } from './flow'
+import { Authorize } from './modules/vtex_services/authorize.service'
 
 const authorizationsBucket = 'authorizations'
 const persistAuthorizationResponse = async (
@@ -63,6 +64,10 @@ export default class TestSuiteApprover extends PaymentProvider {
         this.saveAndRetry(authorization, response)
       )
     }
+
+    const authorize = new Authorize(this.context, authorization)
+
+    authorize.execute()
 
     throw new Error('Not implemented')
   }

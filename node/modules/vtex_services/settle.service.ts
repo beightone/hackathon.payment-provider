@@ -15,5 +15,7 @@ export class Refund<
   ) {
     this.ctx = ctx
     this.settlement = settlement
+
+    console.info(this.ctx, this.settlement)
   }
 }

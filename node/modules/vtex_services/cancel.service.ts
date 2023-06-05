@@ -18,5 +18,7 @@ export class Cancel<
   ) {
     this.ctx = ctx
     this.cancellation = cancellation
+
+    console.info(this.ctx, this.cancellation)
   }
 }

@@ -18,5 +18,11 @@ export class Authorize<
   ) {
     this.ctx = ctx
     this.authorization = authorization
+
+    console.log(this.ctx, this.authorization)
+  }
+
+  public execute() {
+    console.log('Authorize')
   }
 }
