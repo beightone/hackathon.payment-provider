@@ -1,18 +1,13 @@
-import { IOClients, ParamsContext, ServiceContext } from '@vtex/api'
-import { RefundRequest, PaymentProviderState } from '@vtex/payment-provider'
+import { ServiceContext } from '@vtex/api'
+import { RefundRequest } from '@vtex/payment-provider'
 
-export class Refund<
-  ClientsT extends IOClients = IOClients,
-  StateT extends PaymentProviderState = PaymentProviderState,
-  CustomT extends ParamsContext = ParamsContext
-> {
-  private ctx: ServiceContext<ClientsT, StateT, CustomT>
+import { Clients } from '../../clients'
+
+export class Refund {
+  private ctx: ServiceContext<Clients>
   private refund: RefundRequest
 
-  constructor(
-    ctx: ServiceContext<ClientsT, StateT, CustomT>,
-    refund: RefundRequest
-  ) {
+  constructor(ctx: ServiceContext<Clients>, refund: RefundRequest) {
     this.ctx = ctx
     this.refund = refund
 

@@ -30,8 +30,6 @@ export class CustomLogger {
   public error(title: string, err: any) {
     let message = 'Unable to capture the message error'
 
-    console.info(err)
-
     if (err.response) {
       const { url, params, baseURL, timeout } = err.response.config
       const { data } = err.response

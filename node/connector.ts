@@ -1,6 +1,7 @@
 import {
   AuthorizationRequest,
   AuthorizationResponse,
+  Authorizations,
   CancellationRequest,
   CancellationResponse,
   Cancellations,
@@ -17,6 +18,7 @@ import { VBase } from '@vtex/api'
 import { randomString } from './utils'
 import { executeAuthorization } from './flow'
 import { Authorize } from './modules/vtex_services/authorize.service'
+import { Clients } from './clients'
 
 const authorizationsBucket = 'authorizations'
 const persistAuthorizationResponse = async (
@@ -34,7 +36,7 @@ const getPersistedAuthorizationResponse = async (
     true
   )
 
-export default class TestSuiteApprover extends PaymentProvider {
+export default class HackathonVTEXDay extends PaymentProvider<Clients> {
   // This class needs modifications to pass the test suit.
   // Refer to https://help.vtex.com/en/tutorial/payment-provider-protocol#4-testing
   // in order to learn about the protocol and make the according changes.
@@ -67,7 +69,9 @@ export default class TestSuiteApprover extends PaymentProvider {
 
     const authorize = new Authorize(this.context, authorization)
 
-    authorize.execute()
+    await authorize.execute()
+
+    return Authorizations.deny(authorization)
 
     throw new Error('Not implemented')
   }

@@ -1,21 +1,13 @@
-import { IOClients, ParamsContext, ServiceContext } from '@vtex/api'
-import {
-  CancellationRequest,
-  PaymentProviderState,
-} from '@vtex/payment-provider'
+import { ServiceContext } from '@vtex/api'
+import { CancellationRequest } from '@vtex/payment-provider'
 
-export class Cancel<
-  ClientsT extends IOClients = IOClients,
-  StateT extends PaymentProviderState = PaymentProviderState,
-  CustomT extends ParamsContext = ParamsContext
-> {
-  private ctx: ServiceContext<ClientsT, StateT, CustomT>
+import { Clients } from '../../clients'
+
+export class Cancel {
+  private ctx: ServiceContext<Clients>
   private cancellation: CancellationRequest
 
-  constructor(
-    ctx: ServiceContext<ClientsT, StateT, CustomT>,
-    cancellation: CancellationRequest
-  ) {
+  constructor(ctx: ServiceContext<Clients>, cancellation: CancellationRequest) {
     this.ctx = ctx
     this.cancellation = cancellation
 
