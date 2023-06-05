@@ -59,7 +59,7 @@ export default class TestSuiteApprover extends PaymentProvider {
         return persistedResponse
       }
 
-      return executeAuthorization(authorization, response =>
+      return executeAuthorization(authorization, (response) =>
         this.saveAndRetry(authorization, response)
       )
     }
