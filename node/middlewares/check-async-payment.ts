@@ -15,11 +15,13 @@ export async function checkPayment(
     vtex: { account },
   } = ctx
 
-  const body: { paymentIntent: PaymentIntent } = await json(ctx.req)
+  const body: { paymentIntent: PaymentIntent; error: any } = await json(ctx.req)
 
-  const { paymentIntent } = body
+  const { paymentIntent, error } = body
 
-  console.log('ASYNC PAYMENT', paymentIntent)
+  ctx.status = 200
+
+  console.log('ASYNC PAYMENT', body, paymentIntent)
 
   try {
     const repository = new PaymentsRepository(
@@ -28,83 +30,117 @@ export async function checkPayment(
 
     const configClient = new Configuration(ctx)
 
-    const paymentData = await repository.getPaymentByRemoteId(paymentIntent.id)
-
     const delayToAutoSettle = await configClient.getCaptureDelay()
 
-    console.log(paymentData)
+    if (error) {
+      ctx.body = false
 
-    switch (paymentIntent.status) {
-      case 'succeeded':
+      console.log(error.payment_intent)
+
+      const paymentData = await repository.getPaymentByRemoteId(
+        error.payment_intent.id
+      )
+
+      const response = await clients.vtexCallBackClient().execute(
         {
-          const response = await clients.vtexCallBackClient().execute(
-            {
-              paymentId: paymentData.paymentId,
-              transactionId: paymentData.transactionId,
-              account,
-            },
-            {
-              paymentId: paymentData.paymentId as string,
-              tid: paymentIntent.id,
-              authorizationId: '',
-              nsu: '',
-              status: 'approved',
-              code: 'approved',
-              message: 'Payment approved by acquirer',
-              delayToAutoSettle,
-            }
-          )
-
-          console.log(response)
-        }
-
-        break
-
-      case 'canceled':
+          paymentId: paymentData.paymentId,
+          transactionId: paymentData.transactionId,
+          account,
+        },
         {
-          const response = await clients.vtexCallBackClient().execute(
-            {
-              paymentId: paymentData.paymentId,
-              transactionId: paymentData.transactionId,
-              account,
-            },
-            {
-              paymentId: paymentData.paymentId as string,
-              tid: paymentIntent.id,
-              authorizationId: '',
-              nsu: '',
-              status: 'denied',
-              code: 'approved',
-              message: 'Payment approved by acquirer',
-              delayToAutoSettle,
-            }
-          )
-
-          console.log(response)
+          paymentId: paymentData.paymentId as string,
+          tid: paymentIntent.id,
+          authorizationId: '',
+          nsu: '',
+          status: 'denied',
+          code: 'approved',
+          message: 'Payment approved by acquirer',
+          delayToAutoSettle,
         }
+      )
 
-        break
+      console.log(response)
+    } else {
+      const paymentData = await repository.getPaymentByRemoteId(
+        paymentIntent.id
+      )
 
-      default: {
-        const response = await clients.vtexCallBackClient().execute(
+      switch (paymentIntent.status) {
+        case 'succeeded':
           {
-            paymentId: paymentData.paymentId,
-            transactionId: paymentData.transactionId,
-            account,
-          },
-          {
-            paymentId: paymentData.paymentId as string,
-            tid: paymentIntent.id,
-            authorizationId: '',
-            nsu: '',
-            status: 'undefined',
-            code: 'approved',
-            message: 'Payment approved by acquirer',
-            delayToAutoSettle,
+            ctx.body = true
+
+            const response = await clients.vtexCallBackClient().execute(
+              {
+                paymentId: paymentData.paymentId,
+                transactionId: paymentData.transactionId,
+                account,
+              },
+              {
+                paymentId: paymentData.paymentId as string,
+                tid: paymentIntent.id,
+                authorizationId: '',
+                nsu: '',
+                status: 'approved',
+                code: 'approved',
+                message: 'Payment approved by acquirer',
+                delayToAutoSettle,
+              }
+            )
+
+            console.log(response)
           }
-        )
 
-        console.log(response)
+          break
+
+        case 'canceled':
+          {
+            ctx.body = false
+
+            const response = await clients.vtexCallBackClient().execute(
+              {
+                paymentId: paymentData.paymentId,
+                transactionId: paymentData.transactionId,
+                account,
+              },
+              {
+                paymentId: paymentData.paymentId as string,
+                tid: paymentIntent.id,
+                authorizationId: '',
+                nsu: '',
+                status: 'denied',
+                code: 'approved',
+                message: 'Payment approved by acquirer',
+                delayToAutoSettle,
+              }
+            )
+
+            console.log(response)
+          }
+
+          break
+
+        default: {
+          const response = await clients.vtexCallBackClient().execute(
+            {
+              paymentId: paymentData.paymentId,
+              transactionId: paymentData.transactionId,
+              account,
+            },
+            {
+              paymentId: paymentData.paymentId as string,
+              tid: paymentIntent.id,
+              authorizationId: '',
+              nsu: '',
+              status: 'undefined',
+              code: 'approved',
+              message: 'Payment approved by acquirer',
+              delayToAutoSettle,
+            }
+          )
+
+          console.log(response)
+        }
       }
     }
   } catch (err) {

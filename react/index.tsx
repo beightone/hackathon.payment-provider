@@ -17,6 +17,10 @@ const EmbeddedAuthorizationApp = ({ appPayload }: Props) => {
   const STRIPE_CONTAINER_ID = 'stripe-payment-component'
   const parsedPayload = appPayload && JSON.parse(appPayload)
 
+  const respondTransaction = (status: boolean) => {
+    window.$(window).trigger('transactionValidation.vtex', [status])
+  }
+
   // TODO: inject Stripe SDK into the page
   const injectScript = ({ id, src, onLoad }: InjectScriptProps) => {
     if (document.getElementById(id)) {
@@ -52,9 +56,9 @@ const EmbeddedAuthorizationApp = ({ appPayload }: Props) => {
             transactionId: parsedPayload.transactionId,
           }
         )
-      })
 
-    window.$(window).trigger('removePaymentLoading.vtex')
+        respondTransaction(response.data)
+      })
   }, [parsedPayload])
 
   useEffect(() => {
