@@ -1,6 +1,7 @@
 import { ExternalClient } from '@vtex/api'
 
 import { CreateCustomerResponse, CreatePaymentIntenteRequest } from './types'
+import { PaymentIntent } from './payment-intent'
 
 const VERSION = 'v1'
 
@@ -24,7 +25,10 @@ export default class StripeService extends ExternalClient {
     return new URLSearchParams(data).toString()
   }
 
-  public createPaymentIntent(data: CreatePaymentIntenteRequest, token: string) {
+  public createPaymentIntent(
+    data: CreatePaymentIntenteRequest,
+    token: string
+  ): Promise<PaymentIntent> {
     return this.http.post(
       `/${VERSION}/payment_intents`,
       this.getFormaData(data),

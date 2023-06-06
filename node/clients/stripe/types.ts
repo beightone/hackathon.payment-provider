@@ -4,7 +4,7 @@ export interface CreatePaymentIntenteRequest {
   automatic_payment_methods?: AutomaticPaymentMethods
   confirm?: boolean
   payment_method: string
-  customer: string
+  customer: string | null
 }
 
 export interface AutomaticPaymentMethods {

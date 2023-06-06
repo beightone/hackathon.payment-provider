@@ -1,7 +1,6 @@
 import {
   AuthorizationRequest,
   AuthorizationResponse,
-  Authorizations,
   CancellationRequest,
   CancellationResponse,
   Cancellations,
@@ -19,6 +18,7 @@ import { randomString } from './utils'
 import { executeAuthorization } from './flow'
 import { Authorize } from './modules/vtex_services/authorize.service'
 import { Clients } from './clients'
+import { Configuration } from './modules/shared/configuration.service'
 
 const authorizationsBucket = 'authorizations'
 const persistAuthorizationResponse = async (
@@ -67,13 +67,15 @@ export default class HackathonVTEXDay extends PaymentProvider<Clients> {
       )
     }
 
+    const configClient = new Configuration(this.context)
+
+    await configClient.saveToken(this.appToken)
+
     const authorize = new Authorize(this.context, authorization)
 
-    await authorize.execute()
+    const response = await authorize.execute()
 
-    return Authorizations.deny(authorization)
-
-    throw new Error('Not implemented')
+    return response
   }
 
   public async cancel(

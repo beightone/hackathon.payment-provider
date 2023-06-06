@@ -2,20 +2,20 @@ import { ServiceContext } from '@vtex/api'
 import {
   Address,
   AuthorizationRequest,
+  Authorizations,
   CardAuthorization,
   TokenizedCard,
 } from '@vtex/payment-provider'
 
 import { Clients } from '../../../clients'
 import { CustomLogger } from '../../../utils/logger'
-
-const TOKEN =
-  'sk_test_51HgW2AJaRKWlKpKLlNiukm6KWUnmZNFVK6sdtcHNgaoJt8zvHQ7o6kNjlBO1OGGEaqj5t4Y9c4XgTjvb5xgIItWc008Hlagxgq'
+import { Configuration } from '../../shared/configuration.service'
 
 export class Card {
   private ctx: ServiceContext<Clients>
   private authorization: AuthorizationRequest
   private logger: CustomLogger
+  private configClient: Configuration
 
   constructor(
     ctx: ServiceContext<Clients>,
@@ -24,6 +24,7 @@ export class Card {
     this.ctx = ctx
     this.authorization = authorization
     this.logger = new CustomLogger(this.ctx.vtex.logger)
+    this.configClient = new Configuration(ctx)
   }
 
   private async createPaymentMethod() {
@@ -37,6 +38,8 @@ export class Card {
       numberToken: number,
     } = card as TokenizedCard
 
+    const token = await this.configClient.getToken()
+
     try {
       const response = await clients.stripePCIClient().createPaymentMethod(
         {
@@ -48,18 +51,18 @@ export class Card {
             exp_year: parseInt(year, 10),
           },
         },
-        TOKEN,
+        token,
         secureProxyUrl as string
       )
 
       this.logger.info('CREATE_CARD_PAYMENT_METHOD_RESPONSE:', response)
 
-      return response
+      return { ...response, code: '200' }
     } catch (err) {
       this.logger.error('CREATE_CARD_PAYMENT_METHOD', err)
     }
 
-    return { id: null }
+    return { id: null, code: '402' }
   }
 
   private async createCustomer() {
@@ -91,10 +94,12 @@ export class Card {
     formBody.push(`phone=${phone}`)
     formBody.push(`name=${firstName} ${lastName}`)
 
+    const token = await this.configClient.getToken()
+
     try {
       const response = await clients
         .stripeClient()
-        .createCustomer(formBody.join('&'), TOKEN)
+        .createCustomer(formBody.join('&'), token)
 
       this.logger.info('CREATE_CARD_CUSTOMER_RESPONSE', response)
 
@@ -111,14 +116,19 @@ export class Card {
 
     const { clients } = this.ctx
 
+    const token = await this.configClient.getToken()
+
     try {
-      const { id } = await this.createPaymentMethod()
+      const { id, code } = await this.createPaymentMethod()
+
+      if (!id) {
+        return Authorizations.deny(this.authorization, {
+          message: 'Card refused',
+          code,
+        })
+      }
 
       const { id: customer } = await this.createCustomer()
-
-      if (!id || !customer) {
-        throw new Error('Error creating payment method or customer')
-      }
 
       const response = await clients.stripeClient().createPaymentIntent(
         {
@@ -128,18 +138,33 @@ export class Card {
           payment_method: id,
           customer,
         },
-        TOKEN
+        token
       )
 
       this.logger.info('CREATE_CARD_INTENT_RESPONSE', response)
+
+      const delayToAutoSettle = await this.configClient.getCaptureDelay()
+
+      return Authorizations.approve(this.authorization, {
+        tid: response.id,
+        authorizationId: response.charges.data[0].id,
+        message: 'Approved by acquirer',
+        code: '200',
+        delayToAutoSettle,
+      })
     } catch (err) {
       this.logger.error('CREATE_CARD_INTENT', err)
-    }
 
-    // console.log(this.authorization)
+      return Authorizations.deny(this.authorization, {
+        message: 'Card refused',
+        code: '400',
+      })
+    }
   }
 
   public async create() {
-    await this.createPaymentIntent()
+    const response = await this.createPaymentIntent()
+
+    return response
   }
 }

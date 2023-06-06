@@ -26,17 +26,15 @@ export class Authorize {
     const { paymentMethod } = this.authorization
 
     this.isPaymentCreated()
-    console.log('Authorize')
 
     switch (paymentMethod) {
-      case 'Visa':
-        {
-          const cardClient = new Card(this.ctx, this.authorization)
+      case 'Visa': {
+        const cardClient = new Card(this.ctx, this.authorization)
 
-          await cardClient.create()
-        }
+        const response = await cardClient.create()
 
-        break
+        return response
+      }
 
       default:
         throw new Error('Payment not Implemented')
