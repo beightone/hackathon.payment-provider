@@ -123,3 +123,87 @@ export interface MakeTransferRequest {
   destination: string
   transfer_groupd: string
 }
+
+export interface CancelPaymentIntentResponse {
+  id:                          string;
+  object:                      string;
+  amount:                      number;
+  amount_capturable:           number;
+  amount_details:              AmountDetails;
+  amount_received:             number;
+  application:                 null;
+  application_fee_amount:      null;
+  automatic_payment_methods:   null;
+  canceled_at:                 null;
+  cancellation_reason:         null;
+  capture_method:              string;
+  client_secret:               string;
+  confirmation_method:         string;
+  created:                     number;
+  currency:                    string;
+  customer:                    null;
+  description:                 string;
+  invoice:                     null;
+  last_payment_error:          null;
+  latest_charge:               null;
+  livemode:                    boolean;
+  metadata:                    Metadata;
+  next_action:                 null;
+  on_behalf_of:                null;
+  payment_method:              null;
+  payment_method_options:      PaymentMethodOptions;
+  payment_method_types:        string[];
+  processing:                  null;
+  receipt_email:               null;
+  redaction:                   null;
+  review:                      null;
+  setup_future_usage:          null;
+  shipping:                    null;
+  statement_descriptor:        null;
+  statement_descriptor_suffix: null;
+  status:                      string;
+  transfer_data:               null;
+  transfer_group:              null;
+}
+
+export interface AmountDetails {
+  tip: Metadata;
+}
+
+export interface Metadata {
+}
+
+export interface PaymentMethodOptions {
+  card: Card;
+}
+
+export interface Card {
+  installments:           null;
+  mandate_options:        null;
+  network:                null;
+  request_three_d_secure: string;
+}
+
+export interface CreateRefundRequest {
+  
+}
+
+export interface CreateRefundResponse {
+  id:                       string;
+  object:                   string;
+  amount:                   number;
+  balance_transaction:      null;
+  charge:                   string;
+  created:                  number;
+  currency:                 string;
+  metadata:                 Metadata;
+  payment_intent:           null;
+  reason:                   null;
+  receipt_number:           null;
+  source_transfer_reversal: null;
+  status:                   string;
+  transfer_reversal:        null;
+}
+
+export interface Metadata {
+}

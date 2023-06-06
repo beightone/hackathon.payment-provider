@@ -1,6 +1,7 @@
 import { ExternalClient } from '@vtex/api'
 
 import {
+  CancelPaymentIntentResponse,
   CreateCustomerResponse,
   CreatePaymentIntenteRequest,
   MakeTransferRequest,
@@ -74,6 +75,31 @@ export default class StripeService extends ExternalClient {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+    })
+  }
+
+  public cancelPaymentIntent(
+    intentId: string,
+    token: string
+  ): Promise<CancelPaymentIntentResponse> {
+    return this.http.post(
+      `/${VERSION}/payment_intents/${intentId}/cancel`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+  }
+
+  public createRefund(
+    data: any,
+    token: string
+  ) {
+    return this.http.post(`/${VERSION}/refunds`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     })
   }
 }
