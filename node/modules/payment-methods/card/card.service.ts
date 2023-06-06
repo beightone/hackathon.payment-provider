@@ -123,8 +123,6 @@ export class Card {
 
     const { id: tid, client_secret } = paymentIntent
 
-    const token = await this.configClient.getToken()
-
     switch (paymentIntent.status) {
       case 'succeeded': {
         return Authorizations.approve(this.authorization, {
@@ -146,7 +144,13 @@ export class Card {
           message: 'The customer needs to finish the payment flow',
           paymentAppData: {
             appName: `${process.env.VTEX_APP_VENDOR}.${process.env.VTEX_APP_NAME}`,
-            payload: JSON.stringify({ client_secret, token }),
+            payload: JSON.stringify({
+              paymentId: this.authorization.paymentId,
+              transactionId: this.authorization.transactionId,
+              client_secret,
+              token:
+                'pk_test_51HgW2AJaRKWlKpKLNnS1bXptETtV8567iXRUj2OmBEYEPQjcskLcmY4CJSHFl4RfKG5NHaOZFBukI3MpJYdmi7iU00DFbrFwEz',
+            }),
           },
           delayToAutoSettle,
           acquirer: 'Stripe',

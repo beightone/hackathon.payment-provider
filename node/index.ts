@@ -1,8 +1,9 @@
-import { LRUCache, ServiceContext } from '@vtex/api'
+import { LRUCache, ServiceContext, method } from '@vtex/api'
 import { PaymentProviderService } from '@vtex/payment-provider'
 
 import HackathonVTEXDay from './connector'
 import { Clients } from './clients'
+import { checkPayment } from './middlewares/check-async-payment'
 
 const TIMEOUT_MS = 10000
 
@@ -30,4 +31,9 @@ declare global {
 export default new PaymentProviderService({
   clients,
   connector: HackathonVTEXDay,
+  routes: {
+    asyncPaymentConclusion: method({
+      POST: [checkPayment],
+    }),
+  },
 })

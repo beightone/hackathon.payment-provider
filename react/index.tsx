@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
+import axios from 'axios'
 
 import styles from './index.css'
 
@@ -13,10 +14,10 @@ type InjectScriptProps = {
 }
 
 const EmbeddedAuthorizationApp = ({ appPayload }: Props) => {
-  const VOLT_CONTAINER_ID = 'volt-payment-component'
+  const STRIPE_CONTAINER_ID = 'stripe-payment-component'
   const parsedPayload = appPayload && JSON.parse(appPayload)
 
-  // TODO: inject Volt SDK into the page
+  // TODO: inject Stripe SDK into the page
   const injectScript = ({ id, src, onLoad }: InjectScriptProps) => {
     if (document.getElementById(id)) {
       return
@@ -35,24 +36,39 @@ const EmbeddedAuthorizationApp = ({ appPayload }: Props) => {
     head.appendChild(js)
   }
 
-  const initializeVoltPaymentEmbedded = useCallback(() => {}, [parsedPayload])
+  const initializeStripePaymentEmbedded = useCallback(() => {
+    const stripe = new window.Stripe(parsedPayload.token)
 
-  useEffect(() => {
-    console.log('RUNNING')
+    stripe
+      .handleNextAction({
+        clientSecret: parsedPayload.client_secret,
+      })
+      .then(async function(result: any) {
+        const response = await axios.post(
+          '/_v/api/payment/async-payment-conclusion',
+          {
+            ...result,
+            paymentId: parsedPayload.paymentId,
+            transactionId: parsedPayload.transactionId,
+          }
+        )
+      })
 
     window.$(window).trigger('removePaymentLoading.vtex')
+  }, [parsedPayload])
 
+  useEffect(() => {
     injectScript({
-      id: 'volt-sdk',
-      src: 'https://js.volt.io/v1',
-      onLoad: initializeVoltPaymentEmbedded,
+      id: 'stripe-sdk',
+      src: 'https://js.stripe.com/v3/',
+      onLoad: initializeStripePaymentEmbedded,
     })
-  }, [initializeVoltPaymentEmbedded])
+  }, [initializeStripePaymentEmbedded])
 
   return (
     <div className={styles.wrapper}>
-      <div id={VOLT_CONTAINER_ID}>
-        {/* Volt Drop-in component will be rendered here */}
+      <div id={STRIPE_CONTAINER_ID}>
+        {/* Stripe Drop-in component will be rendered here */}
       </div>
     </div>
   )

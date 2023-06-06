@@ -46,6 +46,8 @@ export interface PaymentIntent {
     | 'succeeded'
   transfer_data: any
   transfer_group: any
+  paymentId?: string
+  transactionId: string
 }
 
 export interface AmountDetails {

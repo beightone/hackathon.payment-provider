@@ -3,5 +3,11 @@
   "ttl": 60,
   "timeout": 10000,
   "minReplicas": 2,
-  "maxReplicas": 4
+  "maxReplicas": 4,
+  "routes": {
+    "asyncPaymentConclusion": {
+      "path": "/_v/api/payment/async-payment-conclusion",
+      "public": true
+    }
+  }
 }

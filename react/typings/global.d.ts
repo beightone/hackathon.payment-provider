@@ -10,4 +10,5 @@ declare module '*.css' {
 interface Window {
   vtexjs: VTEXJS
   $: any // JQuery types
+  Stripe: any //
 }
