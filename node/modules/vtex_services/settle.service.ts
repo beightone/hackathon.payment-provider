@@ -8,6 +8,7 @@ import {
 import { Clients } from '../../clients'
 import { CustomLogger } from '../../utils/logger'
 import { Configuration } from '../shared/configuration.service'
+import { PaymentIntent } from '../../clients/stripe/payment-intent'
 
 export class Settle {
   private ctx: ServiceContext<Clients>
@@ -22,48 +23,104 @@ export class Settle {
     this.configClient = new Configuration(ctx)
   }
 
-  private async transferSplit() {
+  private async getPaymentIntent() {
+    const { clients } = this.ctx
+
+    const paymentIntentId = this.settlement.tid as string
+
+    try {
+      const token = await this.configClient.getToken()
+
+      const pamentIntent = await clients
+        .stripeClient()
+        .getPaymentIntent(paymentIntentId, token)
+
+      return pamentIntent
+    } catch (err) {
+      console.log('ERROR', err)
+
+      return null
+    }
+  }
+
+  private async transferSplit(paymentIntent: PaymentIntent) {
     const { clients } = this.ctx
     const token = await this.configClient.getToken()
 
-    const array: Recipient[] = [
-      {
-        id: 'vtexdayhackathon5',
-        name: 'VTEX COMMERCE CLOUD SOLUTIONS LLC',
-        documentType: 'CNPJ',
-        document: '',
-        role: 'marketplace',
-        chargeProcessingFee: true,
-        chargebackLiable: true,
-        amount: 156.0,
-      },
-    ]
+    const transactionId = this.settlement.authorizationId as string
+
+    const recipientArray: Recipient[] = this.settlement
+      .recipients as Recipient[]
 
     try {
       Promise.all(
-        array.map((recipient) => {
+        recipientArray.map((recipient) => {
           return clients.stripeClient().transfer(
             {
-              amount: recipient.amount * 100,
-              currency: 'brl',
-              transfer_groupd: '',
+              amount: Math.floor(recipient.amount * 100),
+              currency: paymentIntent.currency,
+              transfer_group: paymentIntent.transfer_group,
               destination: '',
+              source_transaction: transactionId,
             },
             token
           )
         })
-      ).then((response) => {
-        console.log(response)
-      })
+      )
+        .catch((err) => {
+          this.logger.error('PROMISE_MAKE_TRANSFER_ERROR', err)
+        })
+        .then((response) => {
+          console.log(response)
+
+          return true
+        })
     } catch (err) {
       this.logger.error('MAKE_TRANSFER_ERROR', err)
+
+      return false
+    }
+
+    return false
+  }
+
+  private async checkPayment(paymentIntent: PaymentIntent) {
+    try {
+      switch (paymentIntent.status) {
+        case 'succeeded': {
+          const transferResult = await this.transferSplit(paymentIntent)
+
+          if (transferResult) {
+            return Settlements.approve(this.settlement, { settleId: '' })
+          }
+
+          return Settlements.deny(this.settlement)
+        }
+
+        default:
+          return Settlements.deny(this.settlement)
+      }
+    } catch (err) {
+      this.logger.error('SETTLEMENT_CHECKPAYMENT_ERROR', err)
+
+      return Settlements.deny(this.settlement)
     }
   }
 
-  public execute() {
-    console.log('SETTLEMENT')
+  public async execute() {
+    try {
+      const paymentIntent = await this.getPaymentIntent()
 
-    this.transferSplit()
+      if (!paymentIntent) {
+        return Settlements.deny(this.settlement)
+      }
+
+      const conclusion = await this.checkPayment(paymentIntent)
+
+      return conclusion
+    } catch (err) {
+      this.logger.error('SETTLEMENT_ERROR', err)
+    }
 
     return Settlements.deny(this.settlement)
   }

@@ -121,5 +121,6 @@ export interface MakeTransferRequest {
   amount: number
   currency: string
   destination: string
-  transfer_groupd: string
+  transfer_group: string
+  source_transaction: string
 }
