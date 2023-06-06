@@ -94,7 +94,9 @@ export class Settle {
           const transferResult = await this.transferSplit(paymentIntent)
 
           if (transferResult) {
-            return Settlements.approve(this.settlement, { settleId: '' })
+            return Settlements.approve(this.settlement, {
+              settleId: paymentIntent.id,
+            })
           }
 
           return Settlements.deny(this.settlement)
