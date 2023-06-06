@@ -10,12 +10,15 @@ import {
 import { Clients } from '../../../clients'
 import { CustomLogger } from '../../../utils/logger'
 import { Configuration } from '../../shared/configuration.service'
+import PaymentsRepository from '../../shared/repositories/payments'
+import { PaymentStatus } from '../../shared/repositories/payments/types'
 
 export class Card {
   private ctx: ServiceContext<Clients>
   private authorization: AuthorizationRequest
   private logger: CustomLogger
   private configClient: Configuration
+  private repository: PaymentsRepository
 
   constructor(
     ctx: ServiceContext<Clients>,
@@ -25,6 +28,9 @@ export class Card {
     this.authorization = authorization
     this.logger = new CustomLogger(this.ctx.vtex.logger)
     this.configClient = new Configuration(ctx)
+    this.repository = new PaymentsRepository(
+      this.ctx.clients.paymentsMasterdataClient()
+    )
   }
 
   private async createPaymentMethod() {
@@ -112,7 +118,13 @@ export class Card {
   }
 
   private async createPaymentIntent() {
-    const { value, currency, orderId } = this.authorization
+    const {
+      value,
+      currency,
+      orderId,
+      paymentId,
+      transactionId,
+    } = this.authorization
 
     const { clients } = this.ctx
 
@@ -145,6 +157,14 @@ export class Card {
       this.logger.info('CREATE_CARD_INTENT_RESPONSE', response)
 
       const delayToAutoSettle = await this.configClient.getCaptureDelay()
+
+      this.repository.savePayment({
+        orderId,
+        transactionId,
+        paymentId,
+        status: PaymentStatus.AUTHORIZED,
+        remoteId: response.id,
+      })
 
       return Authorizations.approve(this.authorization, {
         tid: response.id,

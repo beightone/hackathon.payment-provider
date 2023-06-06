@@ -29,6 +29,17 @@ export default class StripeService extends ExternalClient {
     return new URLSearchParams(data).toString()
   }
 
+  public getPaymentIntent(
+    intentId: string,
+    token: string
+  ): Promise<PaymentIntent> {
+    return this.http.get(`/${VERSION}/payment_intents/${intentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  }
+
   public createPaymentIntent(
     data: CreatePaymentIntenteRequest,
     token: string

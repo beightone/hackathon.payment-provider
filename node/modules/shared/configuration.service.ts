@@ -50,6 +50,10 @@ export class Configuration {
   public async getCaptureDelay() {
     const DAY = 0
 
+    if (DAY === 0) {
+      return 1
+    }
+
     return DAY * 24 * 60 * 60
   }
 }

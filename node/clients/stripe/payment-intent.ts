@@ -36,7 +36,14 @@ export interface PaymentIntent {
   source: any
   statement_descriptor: any
   statement_descriptor_suffix: any
-  status: string
+  status:
+    | 'requires_payment_method'
+    | 'requires_confirmation'
+    | 'requires_action'
+    | 'processing'
+    | 'requires_capture'
+    | 'canceled'
+    | 'succeeded'
   transfer_data: any
   transfer_group: any
 }
