@@ -35,19 +35,7 @@ const EmbeddedAuthorizationApp = ({ appPayload }: Props) => {
     head.appendChild(js)
   }
 
-  const initializeVoltPaymentEmbedded = useCallback(() => {
-    const volt = new window.Volt({ mode: 'sandbox' })
-
-    const paymentContainer = volt.payment({
-      payment: parsedPayload,
-      language: 'pt',
-      country: 'BR',
-    })
-
-    const paymentComponent = paymentContainer.createPayment()
-
-    paymentComponent.mount(`#${VOLT_CONTAINER_ID}`)
-  }, [parsedPayload])
+  const initializeVoltPaymentEmbedded = useCallback(() => {}, [parsedPayload])
 
   useEffect(() => {
     console.log('RUNNING')
