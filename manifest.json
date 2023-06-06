@@ -1,7 +1,7 @@
 {
   "name": "payment-provider-hackathon",
   "vendor": "vtexdayhackathon5",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "title": "Payment Provider Example",
   "description": "Reference app for Payment-Provider protocol implementers",
   "builders": {
