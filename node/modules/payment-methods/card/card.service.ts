@@ -145,7 +145,7 @@ export class Card {
           code: '201',
           message: 'The customer needs to finish the payment flow',
           paymentAppData: {
-            appName: 'vtexdayhackathon5.payment-provider-hackathon',
+            appName: `${process.env.VTEX_APP_VENDOR}.${process.env.VTEX_APP_NAME}`,
             payload: JSON.stringify({ client_secret, token }),
           },
           delayToAutoSettle,

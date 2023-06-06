@@ -1,5 +1,6 @@
 .wrapper {
   align-items: center;
+  background: white;
   display: flex;
   flex-direction: column;
   height: 500px;
@@ -11,28 +12,8 @@
   right: 0;
   width: 500px;
   top: 0;
+  box-shadow: 0px 0px 26px 0px rgba(0, 0, 0, 0.42);
   z-index: 999;
-}
-
-.container{
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0px 10px 10px rgba(0, 0, 0, 0.22);
-  background-color: white;
-  padding: 18px 16px;
-  border-radius: 12px;
-  transition: opacity 1000ms ease-out 5s;
-  opacity: 1;
-  border: 1px solid rgba(0, 0, 0, 0.22);
-}
-
-.logoBox{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  overflow: hidden;
-  max-width: 120px;
 }
 
 .buttonDanger {
@@ -50,18 +31,4 @@
 .appPayload {
   width: 100%;
   word-break: break-word;
-}
-
-.loader {
-  border: 8px solid #f3f3f3; /* Light grey */
-  border-top: 8px solid #08c; /* Blue */
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
