@@ -47,10 +47,13 @@ export class Settle {
     const { clients } = this.ctx
     const token = await this.configClient.getToken()
 
-    const transactionId = this.settlement.authorizationId as string
+    this.logger.info('TRANSFER_RECIPIENT', this.settlement.recipients)
 
-    const recipientArray: Recipient[] = this.settlement
-      .recipients as Recipient[]
+    const recipientArray: Recipient[] = this.settlement.recipients?.filter(
+      (recipient) => recipient.role !== 'marketplace'
+    ) as Recipient[]
+
+    this.logger.info('TRANSFER_RECIPIENT', recipientArray)
 
     try {
       Promise.all(
@@ -60,8 +63,8 @@ export class Settle {
               amount: Math.floor(recipient.amount * 100),
               currency: paymentIntent.currency,
               transfer_group: paymentIntent.transfer_group,
-              destination: '',
-              source_transaction: transactionId,
+              destination: recipient.document,
+              source_transaction: paymentIntent.charges.data[0].id,
             },
             token
           )

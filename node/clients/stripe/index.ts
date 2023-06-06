@@ -70,7 +70,9 @@ export default class StripeService extends ExternalClient {
     data: MakeTransferRequest,
     token: string
   ): Promise<CreateCustomerResponse> {
-    return this.http.post(`/${VERSION}/transfers`, data, {
+    console.log(data)
+
+    return this.http.post(`/${VERSION}/transfers`, this.getFormaData(data), {
       headers: {
         Authorization: `Bearer ${token}`,
       },
