@@ -28,6 +28,7 @@ export type Payment = {
   transactionId: string
   status: PaymentStatus
   remoteId: string
+  affiliates: string
 }
 
 export type StoredPayment = Payment & {

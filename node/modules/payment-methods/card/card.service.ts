@@ -223,6 +223,7 @@ export class Card {
         paymentId,
         status: PaymentStatus.AUTHORIZED,
         remoteId: paymentIntent.id,
+        affiliates: '',
       })
 
       return this.checkPayment(paymentIntent)

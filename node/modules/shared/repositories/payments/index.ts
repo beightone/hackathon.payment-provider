@@ -34,6 +34,21 @@ export default class PaymentsRepository {
     return payment
   }
 
+  public async updatePaymentAffiliate(
+    payment: StoredPayment,
+    affiliates: string
+  ) {
+    const updatedPayment: Payment = {
+      ...payment,
+      affiliates,
+    }
+
+    return this.paymentsMasterdataClient.updatePayment(
+      payment.id,
+      updatedPayment
+    )
+  }
+
   public async updatePaymentStatus(
     payment: StoredPayment,
     status: PaymentStatus

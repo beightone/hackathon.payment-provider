@@ -9,18 +9,23 @@ import { Clients } from '../../clients'
 import { CustomLogger } from '../../utils/logger'
 import { Configuration } from '../shared/configuration.service'
 import { PaymentIntent } from '../../clients/stripe/payment-intent'
+import PaymentsRepository from '../shared/repositories/payments'
 
 export class Settle {
   private ctx: ServiceContext<Clients>
   private settlement: SettlementRequest
   private logger: CustomLogger
   private configClient: Configuration
+  private repository: PaymentsRepository
 
   constructor(ctx: ServiceContext<Clients>, settlement: SettlementRequest) {
     this.ctx = ctx
     this.settlement = settlement
     this.logger = new CustomLogger(this.ctx.vtex.logger)
     this.configClient = new Configuration(ctx)
+    this.repository = new PaymentsRepository(
+      this.ctx.clients.paymentsMasterdataClient()
+    )
   }
 
   private async getPaymentIntent() {
@@ -47,11 +52,39 @@ export class Settle {
     const { clients } = this.ctx
     const token = await this.configClient.getToken()
 
+    const affiliates: string[] = []
+
+    const paymentData = await this.repository.getPaymentByRemoteId(
+      paymentIntent.id
+    )
+
+    if (this.settlement.recipients) {
+      this.settlement.recipients.forEach((recipient) => {
+        affiliates.push(recipient.id)
+      })
+
+      await this.repository.updatePaymentAffiliate(
+        paymentData,
+        affiliates.join(',')
+      )
+    }
+
     this.logger.info('TRANSFER_RECIPIENT', this.settlement.recipients)
 
     const recipientArray: Recipient[] = this.settlement.recipients?.filter(
       (recipient) => recipient.role !== 'marketplace'
     ) as Recipient[]
+
+    recipientArray.push({
+      id: 'create_affiliate',
+      name: 'VTEX COMMERCE CLOUD SOLUTIONS LLC',
+      documentType: 'CNPJ',
+      document: 'acct_1NG3PUQv5XI1190s',
+      role: 'marketplace',
+      chargeProcessingFee: true,
+      chargebackLiable: true,
+      amount: 30,
+    })
 
     this.logger.info('TRANSFER_RECIPIENT', recipientArray)
 
@@ -75,16 +108,12 @@ export class Settle {
         })
         .then((response) => {
           console.log(response)
-
-          return true
         })
     } catch (err) {
       this.logger.error('MAKE_TRANSFER_ERROR', err)
-
-      return false
     }
 
-    return false
+    return true
   }
 
   private async checkPayment(paymentIntent: PaymentIntent) {

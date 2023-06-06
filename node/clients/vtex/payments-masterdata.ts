@@ -15,6 +15,7 @@ export default class PaymentsMasterdataClient extends MasterData {
     'transactionId',
     'status',
     'remoteId',
+    'affiliates',
   ]
 
   public async savePayment(payment: Payment) {
