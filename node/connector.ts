@@ -10,63 +10,22 @@ import {
   Refunds,
   SettlementRequest,
   SettlementResponse,
-  Settlements,
 } from '@vtex/payment-provider'
-import { VBase } from '@vtex/api'
 
 import { randomString } from './utils'
-import { executeAuthorization } from './flow'
 import { Authorize } from './modules/vtex_services/authorize.service'
 import { Clients } from './clients'
 import { Configuration } from './modules/shared/configuration.service'
-
-const authorizationsBucket = 'authorizations'
-const persistAuthorizationResponse = async (
-  vbase: VBase,
-  resp: AuthorizationResponse
-) => vbase.saveJSON(authorizationsBucket, resp.paymentId, resp)
-
-const getPersistedAuthorizationResponse = async (
-  vbase: VBase,
-  req: AuthorizationRequest
-) =>
-  vbase.getJSON<AuthorizationResponse | undefined>(
-    authorizationsBucket,
-    req.paymentId,
-    true
-  )
+import { Settle } from './modules/vtex_services/settle.service'
 
 export default class HackathonVTEXDay extends PaymentProvider<Clients> {
   // This class needs modifications to pass the test suit.
   // Refer to https://help.vtex.com/en/tutorial/payment-provider-protocol#4-testing
   // in order to learn about the protocol and make the according changes.
 
-  private async saveAndRetry(
-    req: AuthorizationRequest,
-    resp: AuthorizationResponse
-  ) {
-    await persistAuthorizationResponse(this.context.clients.vbase, resp)
-    this.callback(req, resp)
-  }
-
   public async authorize(
     authorization: AuthorizationRequest
   ): Promise<AuthorizationResponse> {
-    if (this.isTestSuite) {
-      const persistedResponse = await getPersistedAuthorizationResponse(
-        this.context.clients.vbase,
-        authorization
-      )
-
-      if (persistedResponse !== undefined && persistedResponse !== null) {
-        return persistedResponse
-      }
-
-      return executeAuthorization(authorization, (response) =>
-        this.saveAndRetry(authorization, response)
-      )
-    }
-
     const configClient = new Configuration(this.context)
 
     await configClient.saveToken(this.appToken)
@@ -74,6 +33,8 @@ export default class HackathonVTEXDay extends PaymentProvider<Clients> {
     const authorize = new Authorize(this.context, authorization)
 
     const response = await authorize.execute()
+
+    console.log('RESPONSE', response)
 
     return response
   }
@@ -101,11 +62,9 @@ export default class HackathonVTEXDay extends PaymentProvider<Clients> {
   public async settle(
     settlement: SettlementRequest
   ): Promise<SettlementResponse> {
-    if (this.isTestSuite) {
-      return Settlements.deny(settlement)
-    }
+    const settleService = new Settle(this.context, settlement)
 
-    throw new Error('Not implemented')
+    return settleService.execute()
   }
 
   public inbound: undefined

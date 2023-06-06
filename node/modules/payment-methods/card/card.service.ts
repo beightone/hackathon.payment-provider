@@ -112,7 +112,7 @@ export class Card {
   }
 
   private async createPaymentIntent() {
-    const { value, currency } = this.authorization
+    const { value, currency, orderId } = this.authorization
 
     const { clients } = this.ctx
 
@@ -137,6 +137,7 @@ export class Card {
           confirm: true,
           payment_method: id,
           customer,
+          transfer_group: orderId,
         },
         token
       )
@@ -150,6 +151,7 @@ export class Card {
         authorizationId: response.charges.data[0].id,
         message: 'Approved by acquirer',
         code: '200',
+        acquirer: 'Stripe',
         delayToAutoSettle,
       })
     } catch (err) {

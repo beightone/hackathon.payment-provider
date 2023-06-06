@@ -9,7 +9,7 @@ import { PaymentProviderService } from '@vtex/payment-provider'
 import HackathonVTEXDay from './connector'
 import { Clients } from './clients'
 
-const TIMEOUT_MS = 800
+const TIMEOUT_MS = 10000
 
 // Create a LRU memory cache for the Status client.
 // The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.

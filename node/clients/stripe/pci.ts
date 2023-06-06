@@ -1,5 +1,5 @@
 import { SecureExternalClient } from '@vtex/payment-provider'
-import { RequestConfig } from '@vtex/api'
+import { IOContext, InstanceOptions, RequestConfig } from '@vtex/api'
 
 import {
   CreatePaymentMethodRequest,
@@ -9,15 +9,13 @@ import {
 const VERSION = 'v1'
 
 export default class StripePCICertifiedClient extends SecureExternalClient {
-  constructor(protected context: any, options?: any) {
+  constructor(protected context: IOContext, options?: InstanceOptions) {
     super('http://api.stripe.com', context, {
       ...options,
-      timeout: 10000,
+      timeout: 10 * 1000,
       headers: {
-        Accept: 'application/json',
-        'Cache-Control': 'no-cache',
+        ...options?.headers,
         'Content-Type': 'application/x-www-form-urlencoded',
-        VtexIdclientAutCookie: context.authToken,
         'X-Vtex-Use-Https': 'true',
       },
     })

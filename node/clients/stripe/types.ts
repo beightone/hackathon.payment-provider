@@ -5,6 +5,7 @@ export interface CreatePaymentIntenteRequest {
   confirm?: boolean
   payment_method: string
   customer: string | null
+  transfer_group?: string
 }
 
 export interface AutomaticPaymentMethods {
@@ -114,4 +115,11 @@ export interface InvoiceSettings {
   default_payment_method: any
   footer: any
   rendering_options: any
+}
+
+export interface MakeTransferRequest {
+  amount: number
+  currency: string
+  destination: string
+  transfer_groupd: string
 }

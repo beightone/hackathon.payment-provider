@@ -1,6 +1,10 @@
 import { ExternalClient } from '@vtex/api'
 
-import { CreateCustomerResponse, CreatePaymentIntenteRequest } from './types'
+import {
+  CreateCustomerResponse,
+  CreatePaymentIntenteRequest,
+  MakeTransferRequest,
+} from './types'
 import { PaymentIntent } from './payment-intent'
 
 const VERSION = 'v1'
@@ -45,6 +49,17 @@ export default class StripeService extends ExternalClient {
     token: string
   ): Promise<CreateCustomerResponse> {
     return this.http.post(`/${VERSION}/customers`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  }
+
+  public transfer(
+    data: MakeTransferRequest,
+    token: string
+  ): Promise<CreateCustomerResponse> {
+    return this.http.post(`/${VERSION}/transfers`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

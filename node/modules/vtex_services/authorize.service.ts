@@ -14,8 +14,6 @@ export class Authorize {
   ) {
     this.ctx = ctx
     this.authorization = authorization
-
-    console.log(this.ctx, this.authorization)
   }
 
   private isPaymentCreated() {
